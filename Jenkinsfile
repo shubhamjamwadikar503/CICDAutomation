@@ -2,10 +2,10 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = 'your-dockerhub-username/sales-dashboard'
+    IMAGE_NAME = 'shubhamjamwadikar/sales-dashboard'
     IMAGE_TAG = 'latest'
-    AWS_REGION = 'us-east-1'
-    EKS_CLUSTER_NAME = 'your-eks-cluster-name'
+ //   AWS_REGION = 'us-east-1'
+    // EKS_CLUSTER_NAME = 'your-eks-cluster-name'
   }
 
   stages {
@@ -35,6 +35,7 @@ pipeline {
       }
     }
 
+/*
     stage('Deploy to EKS') {
       steps {
         withAWS(region: "${AWS_REGION}", credentials: 'aws-eks-creds') {
@@ -47,5 +48,6 @@ pipeline {
         }
       }
     }
+*/
   }
 }

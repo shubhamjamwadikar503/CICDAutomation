@@ -2,8 +2,9 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = 'shubhamjamwadikar/sales-dashboard'
-    IMAGE_TAG = 'latest'
+    DOCKERHUB_REPO = "shubhamjamwadikar/sales-dashboard"
+    DOCKER_TAG = "${BUILD_NUMBER}"
+    DOCKERHUB_CREDENTIALS = credential('dockerhub-token')
  //   AWS_REGION = 'us-east-1'
     // EKS_CLUSTER_NAME = 'your-eks-cluster-name'
   }
@@ -18,22 +19,35 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-         sh "sudo docker build -t ${IMAGE_NAME} ."
+          def image = docker.build("${DOCKERHUB_REPO}:${DOCKER_TAG}")
+          docker.build("${DOCKERHUB_REPO}:latest")
         }
       }
     }
 
     stage('Push Docker Image') {
       steps {
-        withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
+          echo 'pushing docker image to docker hub'
           script {
-            docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-token') {
-              docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+             sh "docker push ${DOCKERHUB_REPO}:${DOCKER_TAG}"
+             sh "docker push ${DOCKERHUB_REPO}:latest"
             }
           }
         }
-      }
+    stage('Deploy Docker Image') {
+      steps {
+          echo 'Deploying image'
+          script {
+             sh "docker stop sales-dashboard || true"
+             sh "docker rm sales-dashboard || true"
+             sh "docker pull ${DOCKERHUB_REPO}:latest"
+             sh "docker run -d --name sale-dashboard -p 5000:5000 ${DOCKERHUB_REPO}:latest"
+            }
+          }
+        }
+
     }
+}
 
 /*
     stage('Deploy to EKS') {

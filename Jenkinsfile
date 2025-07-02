@@ -10,11 +10,11 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
+    stage('Clone Code') {
+            steps {
+                sh 'git clone https://github.com/shubhamjamwadikar503/CICDAutomation.git/'
+            }
+        }
 
     stage('Build Docker Image') {
       steps {
